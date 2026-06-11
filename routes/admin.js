@@ -22,3 +22,17 @@ router.post('/simulate_payment', (req, res) => {
   creds.saveProof({ farmer_id, lender, amount_kes, payment_hash, preimage, memo: `${lender}-${farmer_id}-${new Date().toISOString().slice(0,10)}` })
   res.json({ ok: true, farmer_id, lender, amount_kes, payment_hash })
 })
+
+// Admin: decrypt a proof's preimage by id (requires ADMIN_TOKEN and PREIMAGE_KEY set)
+router.get('/decrypt/:id', (req, res) => {
+  if (!checkAdmin(req)) return res.status(403).json({ error: 'admin token required' })
+  const proof = db.getProofById(req.params.id)
+  if (!proof) return res.status(404).json({ error: 'proof not found' })
+  if (!proof.preimage_encrypted) return res.status(404).json({ error: 'no encrypted preimage stored' })
+  if (!hasKey()) return res.status(500).json({ error: 'PREIMAGE_KEY not configured on server' })
+  const plain = decrypt(proof.preimage_encrypted)
+  if (!plain) return res.status(500).json({ error: 'decryption failed' })
+  res.json({ id: proof.id, preimage: plain })
+})
+
+module.exports = router
