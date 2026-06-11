@@ -87,3 +87,16 @@ router.get('/status/:payment_hash', (req, res) => {
         on_time: !!proof.on_time
       })
     }
+
+    // Check if the invoice exists at all
+    const invoices = state ? (state.invoices || []) : []
+    const invoice = invoices.find(i => i.payment_hash === payment_hash)
+    if (!invoice) return res.status(404).json({ status: 'not_found' })
+
+    res.json({ status: 'pending' })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+module.exports = router
