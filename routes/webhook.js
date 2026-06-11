@@ -54,3 +54,28 @@ router.post('/payment', async (req, res) => {
     res.status(500).json({ error: 'webhook processing error', message: err.message })
   }
 })
+
+// Simulate a webhook locally: POST /api/webhook/sim with optional JSON body { farmer_id, lender, amount_kes }
+router.post('/sim', async (req, res) => {
+  try {
+    const farmer_id = req.body.farmer_id || 'jmwangi_kisii'
+    const lender = req.body.lender || 'SimLender'
+    const amount_kes = Number(req.body.amount_kes || 1000)
+
+    const preimage = randomHex(32)
+    const payment_hash = crypto.createHash('sha256').update(preimage).digest('hex')
+    const amount = Math.round(amount_kes * 1000)
+    const memo = `${lender}-${farmer_id}-${new Date().toISOString().slice(0,10)}`
+
+    const payload = { payment_hash, preimage, amount, memo }
+    console.info('simulating webhook', { farmer_id, lender, amount_kes })
+
+    const result = await processPayment(payload)
+    res.json({ simulated: true, payload, result })
+  } catch (err) {
+    console.error('sim webhook error', err)
+    res.status(500).json({ error: 'sim webhook failed', message: err.message })
+  }
+})
+
+module.exports = router
