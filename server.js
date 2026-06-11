@@ -35,3 +35,14 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }))
 
+/ initialize DB (adapter.init may be async)
+;(async () => {
+  try {
+    const maybe = init()
+    if (maybe && typeof maybe.then === 'function') await maybe
+    poller.start()
+  } catch (e) {
+    console.error('DB init failed', e)
+    process.exit(1)
+  }
+})()
