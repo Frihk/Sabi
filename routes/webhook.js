@@ -34,3 +34,23 @@ async function processPayment(payload) {
     throw err
   }
 }
+
+router.post('/payment', async (req, res) => {
+  try {
+    const secret = process.env.WEBHOOK_SECRET
+    const headerSecret = req.headers['x-webhook-secret'] || req.query.secret
+    if (secret && headerSecret && headerSecret !== secret) {
+      console.warn('webhook rejected: invalid secret', { ip: req.ip })
+      return res.status(403).json({ error: 'invalid webhook secret' })
+    }
+
+    const payload = req.body
+    console.info('webhook received', { ip: req.ip, memo: payload && payload.memo })
+
+    const result = await processPayment(payload)
+    res.json(result)
+  } catch (err) {
+    console.error('webhook error', err)
+    res.status(500).json({ error: 'webhook processing error', message: err.message })
+  }
+})
