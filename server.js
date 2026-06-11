@@ -46,3 +46,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
     process.exit(1)
   }
 })()
+
+app.use((err, req, res, next) => {
+  console.error(err)
+  res.status(500).json({ error: err.message || 'Server error' })
+})
