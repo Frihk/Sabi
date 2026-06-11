@@ -55,3 +55,12 @@ app.use((err, req, res, next) => {
 const server = app.listen(PORT, () => {
   console.log(`Sabi running on port ${PORT}`)
 })
+
+server.on('error', err => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} in use — stop the other process or set PORT env var.`)
+    process.exit(1)
+  }
+  console.error('Server error', err)
+  process.exit(1)
+})
