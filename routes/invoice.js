@@ -66,3 +66,24 @@ router.post('/', rateLimiter(5, 60000), async (req, res, next) => {
     next(err)
   }
 })
+
+// GET /api/invoice/status/:payment_hash
+// Returns whether this invoice has been settled (i.e. a proof exists for this hash)
+router.get('/status/:payment_hash', (req, res) => {
+  try {
+    const { payment_hash } = req.params
+    // Look for a saved proof matching this payment hash
+    const state = typeof db.load === 'function' ? db.load() : null
+    const proofs = state ? (state.proofs || []) : []
+    const proof = proofs.find(p => p.payment_hash === payment_hash)
+
+    if (proof) {
+      return res.json({
+        status: 'paid',
+        farmer_id: proof.farmer_id,
+        lender: proof.lender,
+        amount_kes: proof.amount_kes,
+        proof_id: proof.id,
+        on_time: !!proof.on_time
+      })
+    }
