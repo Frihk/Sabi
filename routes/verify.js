@@ -17,3 +17,16 @@ router.post('/', (req, res) => {
     res.status(500).json({ error: err.message })
   }
 })
+
+// Verify a stored proof by its ID (server-side — lender only needs the proof ID, not the raw preimage)
+router.get('/:id', (req, res) => {
+  try {
+    const proof = db.getProofById(req.params.id)
+    if (!proof) return res.status(404).json({ error: 'proof not found' })
+
+    if (!proof.preimage_encrypted) {
+      return res.status(422).json({ error: 'preimage not stored for this proof (dev mode — no PREIMAGE_KEY set)' })
+    }
+    if (!hasKey()) {
+      return res.status(500).json({ error: 'PREIMAGE_KEY not configured on server — cannot verify server-side' })
+    }
