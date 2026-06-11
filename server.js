@@ -51,3 +51,7 @@ app.use((err, req, res, next) => {
   console.error(err)
   res.status(500).json({ error: err.message || 'Server error' })
 })
+
+const server = app.listen(PORT, () => {
+  console.log(`Sabi running on port ${PORT}`)
+})
