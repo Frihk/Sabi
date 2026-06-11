@@ -30,3 +30,27 @@ router.get('/:id', (req, res) => {
     if (!hasKey()) {
       return res.status(500).json({ error: 'PREIMAGE_KEY not configured on server — cannot verify server-side' })
     }
+
+     const preimage = decrypt(proof.preimage_encrypted)
+        if (!preimage) return res.status(500).json({ error: 'decryption failed' })
+    
+        const hash = crypto.createHash('sha256').update(Buffer.from(preimage, 'hex')).digest('hex')
+        const valid = hash === proof.payment_hash
+    
+        res.json({
+          valid,
+          proof_id: proof.id,
+          farmer_id: proof.farmer_id,
+          lender: proof.lender,
+          amount_kes: proof.amount_kes,
+          date: (proof.created_at || '').slice(0, 10),
+          on_time: !!proof.on_time,
+          message: valid ? 'Payment verified — preimage matches payment_hash' : 'Invalid — preimage does not match'
+        })
+      } catch (err) {
+        res.status(500).json({ error: err.message })
+      }
+    })
+    
+    module.exports = router
+    
