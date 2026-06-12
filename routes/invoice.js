@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const tando = require('../services/tando')
+const lnbits = require('../services/lnbits')
+const mavapay = require('../services/mavapay')
 const creds = require('../services/credentials')
 const db = require('../database/adapter')
 const QRCode = require('qrcode')
@@ -28,13 +30,13 @@ router.post('/', rateLimiter(5, 60000), async (req, res, next) => {
     const memo = `${lender}-${farmer_id}-${new Date().toISOString().slice(0, 10)}`
     const webhookUrl = getWebhookUrl(req)
 
-    // 1. Generate Lightning Invoice via Tando
-    const data = await tando.createInvoice({ amountSats: sats, amountKes: Number(amount_kes), lender, memo, webhookUrl })
+    // 1. Generate Lightning Invoice via LNbits directly
+    const data = await lnbits.createInvoice({ amountSats: sats, memo, webhookUrl })
 
     const payment_request = data.payment_request || data.bolt11 || data.payreq || null
     const payment_hash    = data.payment_hash   || data.checking_id || data.r_hash || null
 
-    if (!payment_request) return res.status(502).json({ error: 'Tando did not return a payment request' })
+    if (!payment_request) return res.status(502).json({ error: 'LNbits did not return a payment request' })
 
     await creds.createInvoiceRecord({ payment_request, payment_hash, farmer_id, lender, amount_kes })
 
