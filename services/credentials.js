@@ -1,6 +1,7 @@
 const db = require('../database/adapter')
 const { calculateScore } = require('./scoring')
 const { hasKey, encrypt } = require('../lib/crypto')
+const { payoutLender } = require('./lnbits')
 
 async function createInvoiceRecord({ payment_request, payment_hash, farmer_id, lender, amount_kes }) {
   return await db.insertInvoice({ payment_request, payment_hash, farmer_id, lender, amount_kes })
@@ -29,6 +30,14 @@ async function saveProof({ farmer_id, lender, amount_kes, payment_hash, preimage
   const score = calculateScore(proofs || [], defaults)
   
   await db.updateFarmerAggregates(farmer_id, score, (proofs || []).length)
+
+  // Trigger automatic payout to the lender
+  const SATS_PER_KES = parseFloat(process.env.SATS_PER_KES || '0.35')
+  const amountSats = Math.max(1, Math.round(Number(amount_kes) * SATS_PER_KES))
+  
+  payoutLender({ lender, amountSats }).catch(err => {
+    console.error(`[saveProof] Payout failed in background:`, err)
+  })
 }
 
 async function getPassport(farmer_id) {

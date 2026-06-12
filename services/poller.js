@@ -16,17 +16,17 @@ let timer = null
 
 async function pollPendingInvoices() {
   let pending
+  let settledHashes
   try {
-    // Fetch all invoices from the store
-    const state = typeof db.load === 'function' ? db.load() : null
+    // Fetch state from database
+    const state = typeof db.load === 'function' ? await db.load() : null
     pending = state ? state.invoices : []
+    settledHashes = new Set((state ? state.proofs : []).map(p => p.payment_hash))
   } catch (e) {
-    console.warn('[poller] could not read invoices:', e.message)
+    console.warn('[poller] could not read database:', e.message)
     return
   }
 
-  // Only check invoices that don't yet have a corresponding proof
-  const settledHashes = new Set((typeof db.load === 'function' ? (db.load().proofs || []) : []).map(p => p.payment_hash))
   const toCheck = (pending || []).filter(inv => inv.payment_hash && !settledHashes.has(inv.payment_hash))
 
   if (!toCheck.length) return
