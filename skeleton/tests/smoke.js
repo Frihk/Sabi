@@ -19,7 +19,7 @@ async function run() {
   try {
     let r = await fetchText('/')
     console.log('GET /', r.status)
-    if (r.status !== 200 || !r.text.includes('manifest.webmanifest')) {
+    if (r.status !== 200 || !r.text.includes('manifest.webmanifest') || !r.text.includes('theme-color')) {
       throw new Error('app shell failed')
     }
 
@@ -31,8 +31,14 @@ async function run() {
 
     r = await fetchText('/service-worker.js')
     console.log('GET /service-worker.js', r.status)
-    if (r.status !== 200 || !r.text.includes('self.addEventListener')) {
+    if (r.status !== 200 || !r.text.includes('self.addEventListener') || !r.text.includes('networkFirstPage')) {
       throw new Error('service worker failed')
+    }
+
+    r = await fetchText('/app.js')
+    console.log('GET /app.js', r.status)
+    if (r.status !== 200 || !r.text.includes('PAYMENT_QUEUE_KEY') || !r.text.includes('renderOfflineShare')) {
+      throw new Error('offline app features missing')
     }
 
     r = await fetchText('/offline.html')
