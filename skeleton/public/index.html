@@ -1,76 +1,122 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#116149">
-    <meta name="description" content="Portable, offline-ready credit reputation for Kenyan farmers.">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="SabiCredit">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>SabiCredit</title>
-    <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icons/icon.svg">
-    <link rel="stylesheet" href="/styles.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sabi</title>
+    <link rel="stylesheet" href="/styles.css?v=2">
   </head>
   <body>
-    <header class="app-header">
-      <div>
-        <p class="eyebrow">SabiCredit</p>
-        <h1>Credit Passport</h1>
+    <header class="site-header">
+      <div class="container">
+        <div class="brand">
+          <h1>Sabi</h1>
+          <div class="tagline">Lightning credit passport for smallholder farmers</div>
+        </div>
+        <nav class="topnav">
+          <button class="navbtn" data-target="repay">Repay</button>
+          <button class="navbtn" data-target="passport">Passport</button>
+          <button class="navbtn" data-target="profile">Profile</button>
+          <button class="navbtn" data-target="scanner">Scanner</button>
+          <a class="navbtn" href="/admin.html">Admin</a>
+        </nav>
       </div>
-      <div id="connectionStatus" class="status-pill" aria-live="polite">Checking</div>
     </header>
 
-    <main class="app-shell">
-      <section class="passport-panel">
-        <div class="panel-heading">
+    <main class="container">
+    <div id="views">
+      <div id="home" class="card">
+        <div class="home-grid">
           <div>
-            <p class="eyebrow">Farmer</p>
-            <h2 id="farmerName">Loading passport</h2>
+            <div id="farmerName" class="muted">Farmer</div>
+            <div class="name"><strong id="name">John Mwangi</strong></div>
+            <div class="status-row">
+              <div class="status-stat">
+                <span class="label">Credit Score</span>
+                <span id="score" class="big">300</span>
+              </div>
+              <div class="status-stat" style="margin-left: 8px;">
+                <span class="label">Loans Repaid</span>
+                <strong id="loans" style="font-size: 1.5rem; color: var(--text-primary); margin-top: 4px;">0</strong>
+              </div>
+              <div class="status-stat" style="margin-left: 8px;">
+                <span class="label">Defaults</span>
+                <strong id="defaults" style="font-size: 1.5rem; color: var(--accent-danger); margin-top: 4px;">0</strong>
+              </div>
+            </div>
           </div>
-          <strong id="scoreValue" class="score">--</strong>
-        </div>
-
-        <dl class="stats-grid">
-          <div>
-            <dt>Loans repaid</dt>
-            <dd id="loansRepaid">--</dd>
-          </div>
-          <div>
-            <dt>Defaults</dt>
-            <dd id="defaultsCount">--</dd>
-          </div>
-          <div>
-            <dt>Proofs</dt>
-            <dd id="proofsCount">--</dd>
-          </div>
-        </dl>
-
-        <div id="syncMessage" class="sync-message" aria-live="polite"></div>
-      </section>
-
-      <section class="actions-panel">
-        <label for="farmerId">Farmer ID</label>
-        <div class="form-row">
-          <input id="farmerId" name="farmerId" value="jmwangi_kisii" autocomplete="off">
-          <button id="loadPassport" type="button">Load</button>
-        </div>
-      </section>
-
-      <section class="proofs-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Verified history</p>
-            <h2>Repayment Proofs</h2>
+          <div class="home-actions">
+            <button id="toRepay" class="primary">Make a repayment</button>
+            <button id="toPassport" class="secondary">View passport</button>
+            <button id="toProfile" class="secondary">Edit profile</button>
+            <button id="toScanner" class="secondary">Lender scanner</button>
           </div>
         </div>
-        <ul id="proofList" class="proof-list"></ul>
+      </div>
+
+      <section id="repay" class="card hidden">
+        <h3>Repay</h3>
+        <label>Farmer ID</label>
+        <input id="repay_farmer_id" value="jmwangi_kisii" placeholder="farmer id (e.g. jmwangi_kisii)" />
+        <label>Lender</label>
+        <select id="repay_lender"><option>Apollo Agriculture</option><option>Kisii SACCO</option><option>Microfinance</option><option>Other</option></select>
+        <label>Amount (KES)</label>
+        <input id="repay_amount" type="number" value="4500" />
+        <label>Phone Number (for M-Pesa STK Push prompt)</label>
+        <input id="repay_phone" type="text" placeholder="+254790000000 (optional)" value="+254790000000" />
+        <div class="controls">
+          <button id="createInvoice" class="primary">Create Invoice</button>
+          <button id="backFromRepay" class="secondary">Back</button>
+        </div>
+        <div id="invoiceArea" class="mt"></div>
       </section>
+
+      <section id="passport" class="card hidden">
+        <h3>Credit Passport</h3>
+        <div id="passportArea"></div>
+        <div class="controls mt">
+          <input id="passport_id" value="jmwangi_kisii" placeholder="farmer id" style="flex:1;min-width:160px" />
+          <button id="loadPassport" class="primary">Load</button>
+          <button id="passportQR" class="secondary">Share QR</button>
+          <button id="backFromPassport" class="secondary">Back</button>
+        </div>
+        <div id="passportQRArea" class="mt"></div>
+      </section>
+
+      <section id="profile" class="card hidden">
+        <h3>Profile</h3>
+        <label>Farmer ID</label>
+        <input id="profile_id" value="jmwangi_kisii" />
+        <div class="two-col">
+          <div>
+            <label>Name</label>
+            <input id="profile_name" />
+          </div>
+          <div>
+            <label>County</label>
+            <input id="profile_county" />
+          </div>
+        </div>
+        <div class="controls">
+          <button id="saveProfile" class="primary">Save Profile</button>
+          <button id="backFromProfile" class="secondary">Back</button>
+        </div>
+        <div id="profileMsg" class="muted mt"></div>
+      </section>
+
+      <section id="scanner" class="card hidden">
+        <h3>Lender Scanner</h3>
+        <label>Paste Passport JSON</label>
+        <textarea id="scanner_input" rows="8"></textarea>
+        <div class="controls mt"><button id="verifyPassport" class="primary">Verify credential</button> <button id="backFromScanner" class="secondary">Back</button></div>
+        <div id="scannerResult" class="mt"></div>
+      </section>
+    </div>
+
     </main>
 
-    <script src="/app.js" defer></script>
+    <footer class="container muted small">Sabi • prototype</footer>
+
+    <script src="/app.js?v=2"></script>
   </body>
 </html>

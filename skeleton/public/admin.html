@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sabi Admin Console</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .admin-form { max-width:720px; margin:24px auto; }
+    pre {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      color: #38bdf8;
+      padding: 14px;
+      border-radius: var(--border-radius-md);
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 48px;
+    }
+    header.topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    header.topbar h1 {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      margin: 0;
+      background: linear-gradient(to right, #fb7185, #f43f5e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    hr {
+      border: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.05);
+      margin: 32px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <h1>Sabi Admin Console</h1>
+      <div><a href="/" class="navbtn">← Client App</a></div>
+    </header>
+
+    <main class="admin-form">
+      <section class="card">
+        <h2 style="margin-top: 0; font-family: var(--font-mono); font-size: 20px; color: var(--text-primary);">⚡ Simulate Payment</h2>
+        <label>Admin Token (paste):</label>
+        <input id="adminToken" type="password" placeholder="Enter ADMIN_TOKEN" />
+
+        <div class="two-col" style="margin-top: 12px;">
+          <div>
+            <label>Farmer ID</label>
+            <input id="simFarmer" placeholder="e.g. jmwangi_kisii" />
+          </div>
+          <div>
+            <label>Lender</label>
+            <input id="simLender" placeholder="e.g. TestLender" />
+          </div>
+        </div>
+        <label>Amount (KES)</label>
+        <input id="simAmount" type="number" placeholder="450" />
+        <button id="btnSim" class="primary" style="margin-top: 16px; width: 100%;">Send Simulation Webhook</button>
+        <pre id="simResult">Response will appear here...</pre>
+      </section>
+
+      <hr />
+
+      <section class="card">
+        <h2 style="margin-top: 0; font-family: var(--font-mono); font-size: 20px; color: var(--text-primary);">🔓 Decrypt Preimage by Proof ID</h2>
+        <label>Admin Token (paste):</label>
+        <input id="decToken" type="password" placeholder="Enter ADMIN_TOKEN" />
+        <label>Proof ID</label>
+        <input id="proofId" placeholder="e.g. 1" />
+        <button id="btnDec" class="secondary" style="margin-top: 16px; width: 100%;">Decrypt Preimage</button>
+        <pre id="decResult">Decrypted data will appear here...</pre>
+      </section>
+    </main>
+
+    <footer class="muted small" style="margin-top: 48px;">
+      Sabi Admin System • prototype
+    </footer>
+  </div>
+
+  <script src="/admin.js"></script>
+</body>
+</html>
