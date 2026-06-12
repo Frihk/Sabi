@@ -94,6 +94,10 @@ const adapter = {
     return get('SELECT * FROM proofs WHERE payment_hash = ?', [payment_hash])
   },
 
+  async getProofById(id) {
+    return get('SELECT * FROM proofs WHERE id = ?', [id])
+  },
+
   // --- Aggregated Views ---
 
   async getPassport(farmer_id) {
