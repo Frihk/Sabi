@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'sabicredit-v2'
+const CACHE_VERSION = 'sabicredit-v3'
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`
 const API_CACHE = `${CACHE_VERSION}-api`
 

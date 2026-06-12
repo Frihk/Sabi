@@ -5,7 +5,6 @@ SabiCredit has Progressive Web App support for weak or no internet.
 ## Run locally
 
 ```bash
-cd skeleton
 npm run dev
 ```
 

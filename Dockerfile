@@ -2,10 +2,10 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY skeleton/package*.json ./
+COPY package*.json ./
 RUN if [ -s package.json ]; then npm ci --omit=dev || npm install --omit=dev; fi
 
-COPY skeleton/ ./
+COPY ./ ./
 
 ENV NODE_ENV=production
 ENV PORT=4000

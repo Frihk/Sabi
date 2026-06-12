@@ -1,4 +1,4 @@
-APP_DIR := skeleton
+APP_DIR := .
 PORT ?= 4000
 TEST_URL ?= http://localhost:$(PORT)
 
