@@ -381,7 +381,12 @@ MIT — build on it, fork it, deploy it for your community.
 
 ---
 
-## Contact
-
+## Contributors
+[Odinga Valery](https://github.com/odingaval)
+[Daniel Keya](https://github.com/keyadaniel56)
+[Brendan Francis](https://github.com/D3ITY-YODA)
+[Michael Nyawade](https://github.com/Michael-Nyawade)
+[Andrew Okutu](https://github.com/aokutu)
+[Ian Kimani](https://github.com/Frihk)
 
 > *"Sabi" means "know" in Swahili/Sheng. SabiCredit is about being known — owning your reputation, carrying your proof, and never starting from zero again.*
