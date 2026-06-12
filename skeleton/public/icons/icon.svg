@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SabiCredit icon">
+  <rect width="512" height="512" rx="112" fill="#116149"/>
+  <path d="M132 168c0-28 23-51 51-51h146c28 0 51 23 51 51v176c0 28-23 51-51 51H183c-28 0-51-23-51-51V168z" fill="#f7faf7"/>
+  <path d="M182 181h148v34H182v-34zm0 66h148v34H182v-34zm0 66h84v34h-84v-34z" fill="#116149"/>
+  <circle cx="338" cy="330" r="56" fill="#f4b942"/>
+  <path d="M314 331l17 17 34-42" fill="none" stroke="#16352d" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
