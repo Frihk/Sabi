@@ -9,7 +9,7 @@ help:
 	@printf "  make install       Install Node dependencies\n"
 	@printf "  make dev           Start the app on PORT=$(PORT)\n"
 	@printf "  make migrate       Migrate JSON data to SQLite\n"
-	@printf "  make smoke         Run smoke tests against TEST_URL=$(TEST_URL)\n"
+	@printf "  make smoke         Start the app and run PWA smoke tests\n"
 	@printf "  make webhook       Send a simulated payment webhook\n"
 	@printf "  make ngrok         Expose PORT=$(PORT) with ngrok\n"
 	@printf "  make docker-build  Build the local Docker image\n"
@@ -25,6 +25,15 @@ migrate:
 	cd $(APP_DIR) && node scripts/migrate-to-sqlite.js
 
 smoke:
+	cd $(APP_DIR) && PORT=$(PORT) npm run dev & \
+	server_pid=$$!; \
+	trap 'kill $$server_pid 2>/dev/null || true' EXIT; \
+	for attempt in 1 2 3 4 5; do \
+		if node -e "fetch('$(TEST_URL)/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"; then \
+			break; \
+		fi; \
+		sleep 1; \
+	done; \
 	cd $(APP_DIR) && TEST_URL=$(TEST_URL) node tests/smoke.js
 
 webhook:

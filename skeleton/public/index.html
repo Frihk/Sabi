@@ -1,10 +1,15 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Sabi</title>
-    <link rel="stylesheet" href="/styles.css?v=2">
+    <meta name="theme-color" content="#116149" />
+    <meta name="description" content="Portable Lightning credit passport for Kenyan farmers." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon.svg" />
+    <title>SabiCredit</title>
+    <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
     <header class="site-header">
@@ -115,8 +120,10 @@
 
     </main>
 
-    <footer class="container muted small">Sabi • prototype</footer>
+    <footer class="container muted small">
+      Sabi • prototype <span id="pwaStatus" aria-live="polite"></span>
+    </footer>
 
-    <script src="/app.js?v=2"></script>
+    <script src="/app.js"></script>
   </body>
 </html>

@@ -17,6 +17,10 @@ const PORT = process.env.PORT || 3000
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true })
+})
+
 app.use('/api/invoice', invoiceRouter)
 app.use('/api/webhook', webhookRouter)
 app.use('/api/passport', passportRouter)
