@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const tando = require('../services/tando')
-const mavapay = require('../services/mavapay')
 const creds = require('../services/credentials')
 const db = require('../database/adapter')
 const QRCode = require('qrcode')
@@ -44,20 +43,15 @@ router.post('/', rateLimiter(5, 60000), async (req, res, next) => {
 
     const qr_code = await QRCode.toDataURL(payment_request)
 
-    // 2. If phone number is supplied, trigger MavaPay STK Push
+    // 2. In local/dev mode we do not call STK. We only show a simulated prompt.
     let mavapay_quote = null
     if (phone_number && phone_number.trim() !== '') {
-      try {
-        mavapay_quote = await mavapay.triggerStkPush({
-          amountKes: Number(amount_kes),
-          amountSats: sats,
-          lnInvoice: payment_request,
-          phoneNumber: phone_number.trim()
-        })
-      } catch (err) {
-        console.error('[mavapay] STK push trigger failed:', err.message)
-        // We do not fail the request entirely, just report the error so they can pay manually via QR
-        mavapay_quote = { error: 'STK push failed: ' + err.message }
+      mavapay_quote = {
+        simulated: true,
+        promptSent: true,
+        amountKes: Number(amount_kes),
+        phoneNumber: phone_number.trim(),
+        message: `Payment prompt sent to ${phone_number.trim()}. Complete the simulation to save proof.`
       }
     }
 

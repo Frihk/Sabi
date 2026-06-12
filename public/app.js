@@ -199,7 +199,7 @@ async function syncQueuedPayments() {
       const data = await createInvoiceOnline(item)
       updateQueuedPayment(item.id, {
         status: 'invoice_created',
-        reason: 'Invoice created. Payment still needs confirmation.',
+        reason: 'Prompt sent. Payment still needs simulation confirmation.',
         synced_at: new Date().toISOString(),
         invoice: data
       })
@@ -339,27 +339,18 @@ function renderInvoice(data, { farmer_id, lender, amount_kes, phone_number }) {
   const { payment_request, payment_hash, qr_code, proof_count, mavapay_quote } = data
   const baseProofCount = typeof proof_count === 'number' ? proof_count : 0
 
-  let stkMessageHtml = ''
+  let promptMessageHtml = ''
   if (mavapay_quote) {
-    if (mavapay_quote.error) {
-      stkMessageHtml = `
-        <div class="stk-info" style="border: 1px solid var(--accent-danger); background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 12px;">
-          <strong style="color: var(--accent-danger);">❌ M-Pesa STK Push Failed</strong>
-          <div class="small muted">${escapeHtml(mavapay_quote.error)}</div>
-          <div class="small mt">Please scan the Lightning QR code below to pay manually.</div>
-        </div>`
-    } else {
-      stkMessageHtml = `
-        <div class="stk-info" style="border: 1px solid var(--accent-success); background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: left;">
-          <strong style="color: var(--accent-success); display: block; margin-bottom: 4px;">📲 M-Pesa Prompt Triggered</strong>
-          <div>A payment prompt has been sent to <strong>${escapeHtml(phone_number)}</strong>.</div>
-          <div class="small muted mt">Please check your phone, enter your M-Pesa PIN, and confirm.</div>
-        </div>`
-    }
+    promptMessageHtml = `
+      <div class="prompt-info" style="border: 1px solid var(--accent-success); background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 12px; text-align: left;">
+        <strong style="color: var(--accent-success); display: block; margin-bottom: 4px;">Payment Prompt Sent</strong>
+        <div>A simulated payment prompt has been sent to <strong>${escapeHtml(mavapay_quote.phoneNumber || phone_number)}</strong>.</div>
+        <div class="small muted mt">Complete the simulation below to save this repayment to the credit passport.</div>
+      </div>`
   }
 
   $('#invoiceArea').innerHTML = `
-    ${stkMessageHtml}
+    ${promptMessageHtml}
     <div style="text-align:center;margin-bottom:12px">
       <img src="${qr_code}" alt="Lightning QR" style="max-width:220px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.2)"/>
     </div>
@@ -369,13 +360,13 @@ function renderInvoice(data, { farmer_id, lender, amount_kes, phone_number }) {
     </div>
     <div id="invoiceStatusText" class="status-pulse">⏳ Waiting for payment…</div>
     <div style="margin-top:10px">
-      <button id="simPayBtn" class="secondary">⚡ Simulate M-Pesa / STK Payment (Dev)</button>
+      <button id="simPayBtn" class="secondary">Complete Simulation and Save</button>
     </div>`
 
   document.getElementById('simPayBtn').onclick = async () => {
     const btn = document.getElementById('simPayBtn')
     btn.disabled = true
-    btn.innerText = 'Simulating…'
+    btn.innerText = 'Saving…'
     try {
       await fetchWithTimeout('/api/webhook/sim', {
         method: 'POST',
@@ -383,11 +374,11 @@ function renderInvoice(data, { farmer_id, lender, amount_kes, phone_number }) {
         body: JSON.stringify({ farmer_id, lender, amount_kes })
       })
       const el = document.getElementById('invoiceStatusText')
-      if (el) el.innerText = '⏳ Confirming payment…'
+      if (el) el.innerText = 'Saving repayment proof…'
       await checkStatus(payment_hash, farmer_id, lender, amount_kes, baseProofCount)
     } catch (e) {
       const el = document.getElementById('invoiceStatusText')
-      if (el) el.innerText = 'Sim failed: ' + e.message
+      if (el) el.innerText = 'Simulation failed: ' + e.message
     }
   }
 
@@ -436,7 +427,7 @@ document.getElementById('createInvoice').onclick = async () => {
     return
   }
 
-  $('#invoiceArea').innerText = 'Creating invoice…'
+  $('#invoiceArea').innerText = 'Sending simulated prompt…'
   try {
     renderInvoice(await createInvoiceOnline(payload), payload)
   } catch (err) {
