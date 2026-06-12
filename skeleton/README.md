@@ -147,3 +147,241 @@ This JSON is base64-encoded into a QR code. The farmer carries it on their phone
 | Credential verification | Node.js `crypto` SHA256 | Preimage verification, 3 lines of code |
 
 ---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v18+
+- A free LNbits account at [lnbits.com](https://lnbits.com)
+- ngrok (for local webhook testing)
+
+### Installation
+
+```bash
+git clone https://github.com/odingaval/Sabi.git
+cd Sabi
+npm install
+```
+
+### Environment variables
+
+Create a `.env` file in the root:
+
+```env
+LNBITS_URL=https://lnbits.com
+LNBITS_API_KEY=your_invoice_key_here
+WEBHOOK_SECRET=your_random_secret
+PORT=3000
+DATABASE_URL=./sabicredit.db
+SATS_PER_KES=0.35
+```
+
+> Get your `LNBITS_API_KEY` from your LNbits wallet under **API info → Invoice/read key**
+
+### Run the backend
+
+```bash
+npm run dev
+```
+
+### Expose webhook for local testing
+
+```bash
+ngrok http 3000
+# Copy the https URL and set it as your webhook in LNbits
+```
+
+---
+
+## API Reference
+
+### Create a repayment invoice
+
+```http
+POST /api/invoice
+Content-Type: application/json
+
+{
+  "farmer_id": "jmwangi_kisii",
+  "lender": "Apollo Agriculture",
+  "amount_kes": 4500
+}
+```
+
+**Response:**
+```json
+{
+  "payment_request": "lnbc450000n1p3xk...",
+  "payment_hash": "a3f9bc72e1d4...",
+  "qr_code": "data:image/png;base64,..."
+}
+```
+
+---
+
+### Webhook — payment confirmed (fired by LNbits)
+
+```http
+POST /api/webhook/payment
+Content-Type: application/json
+
+{
+  "payment_hash": "a3f9bc72e1d4...",
+  "preimage": "7c2e91fa83b0...",
+  "amount": 450000,
+  "memo": "apollo-jmwangi_kisii-2026-06-08"
+}
+```
+
+SabiCredit catches this, extracts the preimage, saves the credential entry, and recalculates the farmer's score.
+
+---
+
+### Get farmer passport
+
+```http
+GET /api/passport/jmwangi_kisii
+```
+
+**Response:** Full credential JSON with all proofs and current score.
+
+---
+
+### Verify a credential (lender-side)
+
+```http
+POST /api/verify
+Content-Type: application/json
+
+{
+  "preimage": "7c2e91fa83b0...",
+  "payment_hash": "a3f9bc72e1d4..."
+}
+```
+
+**Response:**
+```json
+{
+  "valid": true,
+  "message": "Payment verified — SHA256(preimage) matches payment_hash"
+}
+```
+
+---
+
+## Scoring Algorithm
+
+The reputation score (0–1000) is calculated from verified proofs:
+
+```js
+function calculateScore(proofs) {
+  let score = 300 // base score
+
+  for (const proof of proofs) {
+    score += 60                          // +60 per repaid loan
+    if (proof.on_time) score += 40       // +40 bonus for on-time
+    if (proof.amount_kes > 10000) score += 20  // +20 for larger loans
+  }
+
+  const defaultPenalty = defaults * 150  // -150 per default
+  score -= defaultPenalty
+
+  return Math.min(Math.max(score, 0), 1000) // clamp 0–1000
+}
+```
+
+This is intentionally simple for the hackathon. Production would weight recency, lender diversity, and loan size progression.
+
+---
+
+## Screens
+
+| Screen | User | Description |
+|---|---|---|
+| Home | Farmer | Reputation score, loans repaid, defaults, quick actions |
+| Repay | Farmer | Select lender, enter amount, scan QR to pay via Lightning |
+| Credit Passport | Farmer | All verified proofs, score history, share QR button |
+| Lender Scanner | Lender | Scan farmer QR, see verified history, approve or decline |
+
+---
+
+## Relationship to Tando
+
+SabiCredit and Tando are **complementary, not competing**:
+
+| | Tando | SabiCredit |
+|---|---|---|
+| Core job | Move money (Lightning → KES) | Record proof (payment → credential) |
+| Output | KES in M-Pesa | Signed credential on farmer's phone |
+| Value over time | Static — same utility each use | Compounds — passport grows stronger with each repayment |
+| Touches money | Yes | Never |
+
+In the full flow: the farmer uses SabiCredit to initiate the repayment, pays via Tando, Tando delivers KES to the lender, and SabiCredit captures the proof. They each do one job well.
+
+---
+
+## Why Lightning — Not M-Pesa or Ethereum
+
+| | M-Pesa | Ethereum | Lightning |
+|---|---|---|---|
+| Cryptographic proof | ✗ Safaricom holds the record | ✓ On-chain | ✓ Preimage |
+| Speed | Minutes | 12 seconds | < 1 second |
+| Cost | ~KES 30 per transaction | High gas fees | Near zero |
+| Works for unbanked | ✓ | ✗ Requires crypto literacy | ✓ Via Tando |
+| Proof is portable | ✗ | ✓ | ✓ |
+
+Lightning is the only rail that gives you speed + near-zero fees + a portable cryptographic proof in a single transaction.
+
+---
+
+## Roadmap
+
+### Hackathon MVP (2 days)
+- [x] LNbits invoice creation
+- [x] Webhook handler + preimage capture
+- [x] Credential storage (SQLite)
+- [x] QR generation for farmer passport
+- [x] Lender verification screen
+
+### Version 1.0
+- [ ] React Native mobile app
+- [ ] USSD fallback for feature phones
+- [ ] Multi-lender onboarding flow
+- [ ] Score history and trend graph
+- [ ] Tando direct integration
+
+### Version 2.0
+- [ ] Lender API — accept SabiCredit credentials programmatically
+- [ ] Offline credential verification (no internet needed)
+- [ ] Cross-border support (Uganda, Tanzania)
+- [ ] Open standard for Lightning credit credentials
+
+---
+
+## The Bigger Vision
+
+SabiCredit is not trying to replace lenders. It is trying to give farmers the same information advantage that lenders currently have over them.
+
+Today, Apollo knows everything about a farmer's repayment history. The farmer knows nothing about their own standing in Apollo's eyes. SabiCredit flips that. The farmer owns their history. They walk into any lender — Apollo, a SACCO, a chama, a new microfinance startup — and present proof. The lender competes for the farmer's business based on terms, not information asymmetry.
+
+That is financial inclusion that compounds.
+
+---
+
+## Built At
+
+This project was built at the **Bitcoin Lightning Network Bootcamp & Hackathon — Kisumu, Kenya, 2026**.
+
+---
+
+## License
+
+MIT — build on it, fork it, deploy it for your community.
+
+---
+
+## Contact
+
+
+> *"Sabi" means "know" in Swahili/Sheng. SabiCredit is about being known — owning your reputation, carrying your proof, and never starting from zero again.*
