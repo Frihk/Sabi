@@ -54,7 +54,7 @@ async function triggerStkPush({ amountKes, amountSats, lnInvoice, phoneNumber })
     },
     body: JSON.stringify({
       amount: amountSats.toString(),
-      sourceCurrency: 'KESCENT',
+      sourceCurrency: 'KES',
       targetCurrency: 'BTCSAT',
       paymentMethod: 'MOBILEMONEY', // M-Pesa
       paymentCurrency: 'BTCSAT',
