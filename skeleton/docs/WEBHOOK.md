@@ -69,3 +69,12 @@ curl -s -X POST http://localhost:4000/api/webhook/payment \
 ```bash
 ./scripts/sim-webhook.sh http://localhost:4000/api/webhook/payment
 ```
+
+6) Verify results
+- The webhook handler logs the webhook and saves a proof for the farmer (if the memo contains the farmer id). Check `sabi.json` for new `webhook_logs` and `proofs`.
+
+7) Troubleshooting
+- If the webhook returns `403`, confirm the `X-Webhook-Secret` header matches `WEBHOOK_SECRET`.
+- If no proof appears, ensure the memo follows `lender-farmerid-YYYY-MM-DD` and that `payment_hash` and `preimage` are present.
+
+That's it — use ngrok + LNbits to test live webhooks, or use the curl example to simulate webhooks locally.
