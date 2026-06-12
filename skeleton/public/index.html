@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#116149">
+    <meta name="description" content="Portable, offline-ready credit reputation for Kenyan farmers.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="SabiCredit">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>SabiCredit</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon.svg">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">SabiCredit</p>
+        <h1>Credit Passport</h1>
+      </div>
+      <div id="connectionStatus" class="status-pill" aria-live="polite">Checking</div>
+    </header>
+
+    <main class="app-shell">
+      <section class="passport-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Farmer</p>
+            <h2 id="farmerName">Loading passport</h2>
+          </div>
+          <strong id="scoreValue" class="score">--</strong>
+        </div>
+
+        <dl class="stats-grid">
+          <div>
+            <dt>Loans repaid</dt>
+            <dd id="loansRepaid">--</dd>
+          </div>
+          <div>
+            <dt>Defaults</dt>
+            <dd id="defaultsCount">--</dd>
+          </div>
+          <div>
+            <dt>Proofs</dt>
+            <dd id="proofsCount">--</dd>
+          </div>
+        </dl>
+
+        <div id="syncMessage" class="sync-message" aria-live="polite"></div>
+      </section>
+
+      <section class="actions-panel">
+        <label for="farmerId">Farmer ID</label>
+        <div class="form-row">
+          <input id="farmerId" name="farmerId" value="jmwangi_kisii" autocomplete="off">
+          <button id="loadPassport" type="button">Load</button>
+        </div>
+      </section>
+
+      <section class="proofs-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Verified history</p>
+            <h2>Repayment Proofs</h2>
+          </div>
+        </div>
+        <ul id="proofList" class="proof-list"></ul>
+      </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
